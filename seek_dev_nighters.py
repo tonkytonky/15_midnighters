@@ -13,8 +13,7 @@ def _main():
 
 def load_attempts(number_of_pages):
     for page_num in range(number_of_pages):
-        shift = 1
-        attempts_page = load_attempts_page(page_num + shift)
+        attempts_page = load_attempts_page(page_num + 1)
         for record in json.loads(attempts_page)['records']:
             yield {
                 'username': record['username'],
@@ -24,7 +23,8 @@ def load_attempts(number_of_pages):
 
 
 def load_number_of_pages():
-    return int(json.loads(load_attempts_page(1))['number_of_pages'])
+    first_page = 1
+    return int(json.loads(load_attempts_page(first_page))['number_of_pages'])
 
 
 def load_attempts_page(page):
