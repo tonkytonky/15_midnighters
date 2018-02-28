@@ -6,25 +6,25 @@ from pytz import utc, timezone
 
 
 def _main():
-    midnighters = get_midnighters(load_attempts(load_number_of_pages()))
+    midnighters = get_midnighters(load_attempts())
     for midnighter in sorted(midnighters):
         print(midnighter)
 
 
-def load_attempts(number_of_pages):
-    for page_num in range(number_of_pages):
-        attempts_page = load_attempts_page(page_num + 1)
-        for record in json.loads(attempts_page)['records']:
+def load_attempts():
+    page_num = 1
+    while True:
+        attempts_page = json.loads(load_attempts_page(page_num))
+        for record in attempts_page['records']:
             yield {
                 'username': record['username'],
                 'timestamp': record['timestamp'],
                 'timezone': record['timezone'],
             }
-
-
-def load_number_of_pages():
-    first_page = 1
-    return int(json.loads(load_attempts_page(first_page))['number_of_pages'])
+        if page_num == attempts_page['number_of_pages']:
+            break
+        else:
+            page_num += 1
 
 
 def load_attempts_page(page):
