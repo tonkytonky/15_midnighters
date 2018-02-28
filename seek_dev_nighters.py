@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, tzinfo
 import json
 import requests
 
-from pytz import utc, timezone
+from pytz import timezone
 
 
 def _main():
@@ -36,28 +36,15 @@ def load_attempts_page(page):
 
 def get_midnighters(attempts):
     midnighters = set()
+    midnight = 0
+    working_hours_start = 6
+
     for attempt in attempts:
-        utc_dt = utc.localize(datetime.utcfromtimestamp(attempt['timestamp']))
-        local_tz = timezone(attempt['timezone'])
-        local_dt = utc_dt.astimezone(local_tz)
-        local_date = {
-            'year': local_dt.year,
-            'month': local_dt.month,
-            'day': local_dt.day,
-        }
-        midnight = local_tz.localize(datetime(
-            **local_date,
-            hour=0,
-            minute=0,
-            second=0
-        ))
-        working_hours_start = local_tz.localize(datetime(
-            **local_date,
-            hour=9,
-            minute=0,
-            second=0
-        ))
-        if midnight < local_dt < working_hours_start:
+        attempt_dt = datetime.fromtimestamp(
+            attempt['timestamp'],
+            timezone(attempt['timezone'])
+        )
+        if midnight < attempt_dt.hour < working_hours_start:
             midnighters.add(attempt['username'])
 
     return list(midnighters)
