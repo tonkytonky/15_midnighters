@@ -1,20 +1,19 @@
 from datetime import datetime
-import json
 import requests
 
 from pytz import timezone
 
 
 def _main():
-    midnighters = get_midnighters(fetch_attempts())
+    midnighters = get_midnighters(load_attempts())
     for midnighter in sorted(midnighters):
         print(midnighter)
 
 
-def fetch_attempts():
+def load_attempts():
     page_num = 1
     while True:
-        attempts_page = json.loads(fetch_attempts_page(page_num))
+        attempts_page = fetch_attempts_page(page_num)
         for record in attempts_page['records']:
             yield {
                 'username': record['username'],
@@ -31,7 +30,7 @@ def fetch_attempts_page(page):
     return requests.get(
         'https://devman.org/api/challenges/solution_attempts/',
         params={'page': page}
-    ).text
+    ).json()
 
 
 def get_midnighters(attempts):
